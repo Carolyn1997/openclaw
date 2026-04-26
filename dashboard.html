@@ -133,8 +133,8 @@
 
   .modal {
     position: fixed;
-    top: 0; left: 0; right: 0; bottom: 0;
-    background: rgba(0,0,0,0.8);
+    inset: 0;
+    background: rgba(0,0,0,0.85);
     display: none;
     align-items: center;
     justify-content: center;
@@ -156,12 +156,6 @@
     border-radius: 9999px;
     font-weight: 700;
     cursor: pointer;
-    transition: all 0.2s;
-  }
-
-  button:hover {
-    transform: translateY(-1px);
-    box-shadow: 0 0 20px var(--green-glow);
   }
 </style>
 </head>
@@ -177,11 +171,12 @@
   <a href="#" class="nav-item" onclick="showPage('usage')">📊 用量统计</a>
   <a href="#" class="nav-item" onclick="showPage('billing')">💰 充值记录</a>
   <a href="#" class="nav-item" onclick="showRechargeModal()">💵 立即充值</a>
-  <a href="#" class="nav-item">⚙️ 设置</a>
+  <a href="index.html" class="nav-item">← 返回首页</a>
 </div>
 
 <!-- 主内容 -->
 <div class="main-content" id="main-content">
+
   <!-- Dashboard Page -->
   <div id="page-dashboard">
     <div class="header">
@@ -199,13 +194,11 @@
     <div class="card-grid">
       <div class="card">
         <h3>今日消耗</h3>
-        <div style="font-size:32px; font-weight:700; margin:12px 0;">248k tokens</div>
-        <div style="color:#fb923c;">↑ 12% from yesterday</div>
+        <div style="font-size:32px; font-weight:700; margin:12px 0;">248,392 tokens</div>
       </div>
       <div class="card">
         <h3>活跃 API Keys</h3>
         <div style="font-size:32px; font-weight:700; margin:12px 0;">7</div>
-        <div style="color:#4ade80;">全部正常运行</div>
       </div>
       <div class="card">
         <h3>本月花费</h3>
@@ -220,13 +213,9 @@
       <h1 style="font-size: 32px; font-weight: 800;">API Keys</h1>
       <button onclick="createNewKey()">+ 新建 API Key</button>
     </div>
-
-    <div class="key-list" id="key-list">
-      <!-- JS 会动态填充 -->
-    </div>
+    <div class="key-list" id="key-list"></div>
   </div>
 
-  <!-- 其他页面可后续扩展 -->
 </div>
 
 <!-- 充值模态框 -->
@@ -235,17 +224,16 @@
     <h2 style="margin-bottom:24px;">立即充值</h2>
     <p>请选择充值金额（美元）</p>
     <div style="display:grid; grid-template-columns:1fr 1fr; gap:12px; margin:20px 0;">
-      <button onclick="recharge(10)">$10</button>
-      <button onclick="recharge(30)">$30</button>
-      <button onclick="recharge(50)">$50</button>
-      <button onclick="recharge(100)">$100</button>
+      <button onclick="recharge(10)" style="width:100%;">$10</button>
+      <button onclick="recharge(30)" style="width:100%;">$30</button>
+      <button onclick="recharge(50)" style="width:100%;">$50</button>
+      <button onclick="recharge(100)" style="width:100%;">$100</button>
     </div>
     <button onclick="closeModal()" style="background:#333; width:100%; margin-top:12px;">取消</button>
   </div>
 </div>
 
 <script>
-  // 模拟数据
   let keys = [
     { id: 1, name: "Default Key", key: "opw_sk_8f3k9x2m1p7q", created: "2026-04-20", usage: "124k tokens" },
     { id: 2, name: "Production Key", key: "opw_sk_9v4n2x7q1m8p", created: "2026-04-25", usage: "89k tokens" }
@@ -265,4 +253,52 @@
         <div style="text-align:right;">
           <small>${k.created}</small><br>
           <small>${k.usage}</small>
-       
+        </div>
+      `;
+      container.appendChild(div);
+    });
+  }
+
+  function createNewKey() {
+    const name = prompt("请输入新 API Key 名称：", "New Key");
+    if (name) {
+      keys.push({
+        id: Date.now(),
+        name: name,
+        key: "opw_sk_" + Math.random().toString(36).substring(2,15),
+        created: "2026-04-27",
+        usage: "0 tokens"
+      });
+      renderKeys();
+    }
+  }
+
+  function showPage(page) {
+    document.querySelectorAll('#main-content > div').forEach(div => div.style.display = 'none');
+    document.getElementById(`page-${page}`).style.display = 'block';
+
+    document.querySelectorAll('.nav-item').forEach(item => item.classList.remove('active'));
+    event.currentTarget.classList.add('active');
+  }
+
+  function showRechargeModal() {
+    document.getElementById('recharge-modal').style.display = 'flex';
+  }
+
+  function closeModal() {
+    document.getElementById('recharge-modal').style.display = 'none';
+  }
+
+  function recharge(amount) {
+    alert(`已发起 $${amount} 充值请求（实际支付功能后续接入 Stripe）`);
+    closeModal();
+  }
+
+  // 初始化
+  window.onload = () => {
+    renderKeys();
+    showPage('dashboard');
+  };
+</script>
+</body>
+</html>
